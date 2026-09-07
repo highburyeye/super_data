@@ -505,11 +505,13 @@ switch ($page_type) {
                     $product_attributes[$attribute['products_attributes_id']]['option_name'] = $attribute['products_options_name'];
                     $product_attributes[$attribute['products_attributes_id']]['option_value_id'] = $attribute['options_values_id'];
                     $product_attributes[$attribute['products_attributes_id']]['option_value'] = $attribute['products_options_values_name'];
+                    $attribute_displayed_price = (float)$attribute['options_values_price'];
+                    if ($includeProductTax) {
+                        $attribute_displayed_price *= 1 + zen_get_tax_rate($tax_class_id) / 100;
+                    }
+                    $attribute_displayed_price = round($attribute_displayed_price, 2);
                     $product_attributes[$attribute['products_attributes_id']]['price'] = zen_get_products_price_is_priced_by_attributes($product_id)
-                        ? round(
-                            (float)$attribute['options_values_price'] * (1 + zen_get_tax_rate($tax_class_id) / 100),
-                            2
-                        )
+                        ? $attribute_displayed_price
                         : $product_base_displayed_price;
                     // It's unlikely that a product price is 0, so only store non-zero prices to subsequently get the high and low prices
                     if ($product_attributes[$attribute['products_attributes_id']]['price'] > 0) {
