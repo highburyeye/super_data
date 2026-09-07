@@ -418,7 +418,11 @@ switch ($page_type) {
                     $product_attributes[$attribute['products_attributes_id']]['option_name'] = $attribute['products_options_name'];
                     $product_attributes[$attribute['products_attributes_id']]['option_value_id'] = $attribute['options_values_id'];
                     $product_attributes[$attribute['products_attributes_id']]['option_value'] = $attribute['products_options_values_name'];
-                    $product_attributes[$attribute['products_attributes_id']]['price'] = zen_get_products_price_is_priced_by_attributes($product_id) ? $attribute['options_values_price']
+                    $product_attributes[$attribute['products_attributes_id']]['price'] = zen_get_products_price_is_priced_by_attributes($product_id)
+                        ? round(
+                            (float)$attribute['options_values_price'] * (1 + zen_get_tax_rate($tax_class_id) / 100),
+                            2
+                        )
                         : $product_base_displayed_price;
                     // It's unlikely that a product price is 0, so only store non-zero prices to subsequently get the high and low prices
                     if ($product_attributes[$attribute['products_attributes_id']]['price'] > 0) {
@@ -1446,7 +1450,7 @@ if (PLUGIN_SUPERDATA_SCHEMA_ENABLE === 'true') {
                         }
 
                         if ($product_attribute['stock'] < 1 && $backPreOrderDate !== '') {
-                            $offer['availability_date'] = $backPreOrderDate;
+                            $offer['availabilityStarts'] = $backPreOrderDate;
                         }
 
                         $offers[] = $offer;
@@ -1483,8 +1487,8 @@ if (PLUGIN_SUPERDATA_SCHEMA_ENABLE === 'true') {
                         $offer['offerCount'] = $offerCount;
                     }
 
-                    if ($backPreOrderDate !== '') {
-                        $offer['availability_date'] = $backPreOrderDate;
+                    if ($product_base_stock < 1 && $backPreOrderDate !== '') {
+                        $offer['availabilityStarts'] = $backPreOrderDate;
                     }
 
                     $leadTime = ($product_base_stock > 0
@@ -1526,8 +1530,8 @@ if (PLUGIN_SUPERDATA_SCHEMA_ENABLE === 'true') {
 
             $offer = array_merge($offer, $offerEnhancements);
 
-            if ($backPreOrderDate !== '') {
-                $offer['availability_date'] = $backPreOrderDate;
+            if ($product_base_stock < 1 && $backPreOrderDate !== '') {
+                $offer['availabilityStarts'] = $backPreOrderDate;
             }
 
             $leadTime = ($product_base_stock > 0
